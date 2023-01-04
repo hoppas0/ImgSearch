@@ -1,3 +1,4 @@
+#基本来自示例代码
 import asyncio
 from loguru import logger
 from PicImageSearch import Network, SauceNAO
@@ -35,6 +36,7 @@ def show_result(resp: SauceNAOResponse) -> None:
     logger.info(resp.raw[0].url)
     logger.info(resp.raw[0].ext_urls)
     logger.info("-" * 50)
+
 
 
 if __name__ == "__main__":
