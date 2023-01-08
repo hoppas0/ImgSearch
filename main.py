@@ -1,11 +1,15 @@
 import base64
 import asyncio
+import time
+
 from PIL import Image
 import PySimpleGUI as sg
 import os.path
 from io import BytesIO
 from ImgSearch import ImgSearch
 from UrlToBase64 import urltobase64
+from GetPixivImg import GetPixivImg
+import pyperclip
 
 apikey = ''
 
@@ -24,6 +28,7 @@ async def run():
                 values=[], enable_events=True, size=(40, 20), key="-FILE LIST-"
             )
         ],
+        [sg.Button(key="-download-", button_text="自动搜图并下载")],
         [sg.Text(size=(40, 1), key="-remaining-")],
     ]
     image_viewer_column = [
@@ -36,7 +41,7 @@ async def run():
         [sg.Text("相似度:", key="-similarity-")],
         [sg.Text("作者:", key="-author-")],
         [sg.Input(key='-URL-', size=(20, 1)),
-         sg.Button(key="-copyUrl-",button_text='复制链接')],
+         sg.Button(key="-copyUrl-", button_text="复制链接")],
     ]
     layout = [
         [
@@ -60,13 +65,18 @@ async def run():
 
         if event == "Exit" or event == sg.WIN_CLOSED:
             break
+
+        if event == "-copyUrl-":
+            pyperclip.copy(values["-URL-"])
+
+
+
         if event == "-FOLDER-":
             folder = values["-FOLDER-"]
             try:
                 file_list = os.listdir(folder)
             except:
                 file_list = []
-
             fnames = [
                 f
                 for f in file_list
@@ -121,10 +131,28 @@ async def run():
                 print("出错了")
                 print(e.args)
                 window["-remaining-"].update("出错了")
-                pass
+
+        if event == "-download-":       # 这只下载，就不显示了
+            # 打开文件夹
+            path = values["-FOLDER-"]
+            dirs = os.listdir(path)
+            window["-remaining-"].update("正在下载")
+            # 搜索并保存图片
+            for file in dirs:
+                if file[-3:] in ["jpg", "png"]:
+                    filename = path+'/'+file
+                    resp = await ImgSearch(filename, apikey)
+                    if "pixiv.net" in resp.raw[0].url:
+                        GetPixivImg(file, resp.raw[0].url)
+                        if resp.short_remaining == 0:
+                            time.sleep(30)
+                            if resp.long_remaining == 0:
+                                window["-remaining-"].update("每日访问额度用完了")
+                                break
+            else:
+                window["-remaining-"].update("下载结束")
 
     window.close()
-
 
 
 if __name__ == "__main__":

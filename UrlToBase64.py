@@ -13,7 +13,6 @@ def urltobase64(url):
     return ls_f
 
 
-
 if __name__ == "__main__":
     url = 'https://img3.saucenao.com/dA2/86767/867670574.jpg?auth=xa7vODyYEuJzP5ONSYLuxg&exp=1672776000'
     print(type(urltobase64(url)))
