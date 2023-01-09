@@ -28,7 +28,8 @@ async def run():
                 values=[], enable_events=True, size=(40, 20), key="-FILE LIST-"
             )
         ],
-        [sg.Button(key="-download-", button_text="自动搜图并下载")],
+        [sg.Button(key="-download-", button_text="自动搜图并下载"),
+         sg.Text("这里的下载仅限于pixiv上的图片")],
         [sg.Text(size=(40, 1), key="-remaining-")],
     ]
     image_viewer_column = [
@@ -42,6 +43,9 @@ async def run():
         [sg.Text("作者:", key="-author-")],
         [sg.Input(key='-URL-', size=(20, 1)),
          sg.Button(key="-copyUrl-", button_text="复制链接")],
+        [sg.Text("注意：")],
+        [sg.Text("搜图前请确认是否填写好apikey")],
+        [sg.Text("下载前请确认是否打开了代理")],
     ]
     layout = [
         [
