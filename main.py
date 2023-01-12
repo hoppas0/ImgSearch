@@ -140,7 +140,7 @@ async def run():
             # 打开文件夹
             path = values["-FOLDER-"]
             dirs = os.listdir(path)
-            window["-remaining-"].update("正在下载")
+            window["-remaining-"].update("大概率网络出问题了")
             # 搜索并保存图片
             for file in dirs:
                 if file[-3:] in ["jpg", "png"]:
