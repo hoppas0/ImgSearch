@@ -3,7 +3,7 @@ import time
 import requests
 
 
-def GetPixivImg(name:str, url:str):
+async def GetPixivImg(name:str, url:str):
     """
     通过pixiv网址下载图片
     由于这是个搜索原图并下载的程序，为了方便看出原图片是否下载到原图，所以这里下载图片的名字就是原图片的名字

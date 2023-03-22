@@ -1,5 +1,6 @@
 import base64
 import asyncio
+import threading
 import time
 
 from PIL import Image
@@ -12,9 +13,11 @@ from GetPixivImg import GetPixivImg
 import pyperclip
 
 apikey = ''
-
+downloadcomplete = False
+downloadremaining = ""
 
 async def run():
+    global apikey, downloadcomplete, downloadremaining
     file_list_column = [
         [sg.Text("将你的 api key 填到下方")],
         [sg.Input(key="-apikey-", size=(40, 1))],
@@ -72,8 +75,6 @@ async def run():
 
         if event == "-copyUrl-":
             pyperclip.copy(values["-URL-"])
-
-
 
         if event == "-FOLDER-":
             folder = values["-FOLDER-"]
@@ -136,28 +137,58 @@ async def run():
                 print(e.args)
                 window["-remaining-"].update("出错了")
 
-        if event == "-download-":       # 这只下载，就不显示了
+        if event == "-download-":  # 这只下载，就不显示了
             # 打开文件夹
             path = values["-FOLDER-"]
             dirs = os.listdir(path)
-            window["-remaining-"].update("大概率网络出问题了")
+            window["-remaining-"].update("正在下载，请稍候")
             # 搜索并保存图片
-            for file in dirs:
-                if file[-3:] in ["jpg", "png"]:
-                    filename = path+'/'+file
-                    resp = await ImgSearch(filename, apikey)
-                    if "pixiv.net" in resp.raw[0].url:
-                        GetPixivImg(file, resp.raw[0].url)
-                        if resp.short_remaining == 0:
-                            time.sleep(30)
-                            if resp.long_remaining == 0:
-                                window["-remaining-"].update("每日访问额度用完了")
-                                break
-            else:
-                window["-remaining-"].update("下载结束")
+            # for file in dirs:
+            #     if file[-3:] not in ["jpg", "png"]:
+            #         continue
+            #     filename = path + '/' + file
+            #     resp = await ImgSearch(filename, apikey)
+            #     if resp.short_remaining == 0:
+            #         time.sleep(30)
+            #     if resp.long_remaining == 0:
+            #         window["-remaining-"].update("每日访问额度用完了")                   # 原来是8层缩进,现在缩减到了5层
+            #         break
+            #     if "pixiv.net" in resp.raw[0].url:
+            #         await GetPixivImg(file, resp.raw[0].url)            # 异步调用GetPixivImg
+            # else:       # for循环正常结束
+            #     window["-remaining-"].update("下载结束")
+            BatchDownloads_thread = threading.Thread(target=BatchDownloads, args=(path, dirs))
+            BatchDownloads_thread.daemon = True
+            BatchDownloads_thread.start()
+
+        if downloadcomplete:
+            window["-remaining-"].update(downloadremaining)
+            downloadcomplete = False
 
     window.close()
 
+
+def BatchDownloads(path, dirs):
+    global downloadremaining, downloadcomplete
+    for file in dirs:
+        if file[-3:] not in ["jpg", "png"]:
+            continue
+        filename = path + '/' + file
+        resp = await ImgSearch(filename, apikey)
+        if resp.short_remaining == 0:
+            time.sleep(30)
+        if resp.long_remaining == 0:
+            # window["-remaining-"].update("每日访问额度用完了")  # 原来是8层缩进,现在缩减到了5层
+            downloadremaining = "每日访问额度用完了"
+            downloadcomplete = True
+            return
+        if "pixiv.net" in resp.raw[0].url:
+            await GetPixivImg(file, resp.raw[0].url)  # 异步调用GetPixivImg
+    else:  # for循环正常结束
+        # window["-remaining-"].update("下载结束")
+        downloadremaining = "下载结束"
+        downloadcomplete = True
+        return
 
 if __name__ == "__main__":
     asyncio.run(run())
