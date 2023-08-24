@@ -3,6 +3,7 @@
 基于 PicImageSearch 的搜图小程序，可以利用 SauceNAO 搜出图片的来源（pixiv、twitter等都可以）。还可以把要搜的图放在一个文件夹里，自动下载图片的原图（如果能搜到并且原图来自pixiv的话）
 
 ![avatar](https://files.catbox.moe/8fyh5b.png)
+![avatar](https://files.catbox.moe/1gdqbo.png)
 
 ## 如何使用
 

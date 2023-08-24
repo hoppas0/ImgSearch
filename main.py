@@ -51,7 +51,7 @@ languages = {
 async def run():
     global apikey, languages, selected_language
     file_list_column = [
-        [sg.Text("选择语言", size=(10, 1), key='-SELECTLANGUAGE-'),
+        [sg.Text("选择语言", size=(20, 1), key='-SELECTLANGUAGE-'),
          sg.Combo(["Chinese", "English"], size=(10, 1), default_value="Chinese", enable_events=True, key='-LANGUAGE-')],
         [sg.Text("将你的 api key 填到下方", key='-TIPS1-')],
         [sg.Input(key="-apikey-", size=(40, 1))],
@@ -102,7 +102,8 @@ async def run():
                 apikey = f.readline()
                 window["-apikey-"].update(apikey)
         except:
-            window["-remaining-"].update("apikey.txt出错了")
+            window["-remaining-"].update(
+                "apikey.txt出错了" if selected_language == 'Chinese' else "APIkey .txt Something went wrong")
 
         if event == "Exit" or event == sg.WIN_CLOSED:
             break
@@ -177,7 +178,7 @@ async def run():
                 rimg.save(rimg_buffer, format='PNG')
                 rbyte_data = rimg_buffer.getvalue()
                 rb64f = base64.b64encode(rbyte_data)
-                similarity_message=f"相似度:{resp.raw[0].similarity}" if selected_language == 'Chinese' else f"Similarity:{resp.raw[0].similarity}"
+                similarity_message = f"相似度:{resp.raw[0].similarity}%" if selected_language == 'Chinese' else f"Similarity:{resp.raw[0].similarity}%"
                 window["-similarity-"].update(similarity_message)
                 author_message = f"作者:{resp.raw[0].author}" if selected_language == 'Chinese' else f"Author:{resp.raw[0].author}"
                 window["-author-"].update(author_message)
@@ -204,7 +205,8 @@ async def run():
                 if resp.short_remaining == 0:
                     time.sleep(30)
                 if resp.long_remaining == 0:
-                    window["-remaining-"].update("每日访问额度用完了" if selected_language == 'Chinese' else 'The daily access credit is running out')  # 原来是8层缩进,现在缩减到了5层
+                    window["-remaining-"].update(
+                        "每日访问额度用完了" if selected_language == 'Chinese' else 'The daily access credit is running out')  # 原来是8层缩进,现在缩减到了5层
                     break
                 if "pixiv.net" in resp.raw[0].url:
                     await GetPixivImg(file, resp.raw[0].url)  # 异步调用GetPixivImg
