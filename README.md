@@ -2,7 +2,7 @@
 
 基于 PicImageSearch 的搜图小程序，可以利用 SauceNAO 搜出图片的来源（pixiv、twitter等都可以）。还可以把要搜的图放在一个文件夹里，自动下载图片的原图（如果能搜到并且原图来自pixiv的话）
 
-![avatar](https://nekofile.eu.org/c2883c0646b0c9ba5503blwia)
+![avatar](https://files.catbox.moe/8fyh5b.png)
 
 ## 如何使用
 
@@ -25,11 +25,11 @@
 如果点击了“自动搜图并下载”，它会在同级目录下创建一个名叫 PixivImage 的文件夹，并且把搜到的原图下载到这个文件夹里。而且，下载的图片的名字和原图片名是相同的，方便比较查出哪些图片没有下载。
 例如，下面是我用来测试的10张图片
 
-![avatar](https://nekofile.eu.org/7556d6a692a261d0fb43606t2)
+![avatar](https://files.catbox.moe/h1qhw4.png)
 
 利用本程序的“自动搜图并下载”功能后，得到的结果如下图（如果原图不来自pixiv或者出现了网络问题，那么就会跳过这张图去下载下一个）
 
-![avatar](https://nekofile.eu.org/fb54e19fe8f7e1901902bfjk8)
+![avatar](https://files.catbox.moe/mpfj79.png)
 
 因为图片的名字是相同的，所以排序方式也是相同的，这样就方便找出哪些图没有下载
 
