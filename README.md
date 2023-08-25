@@ -1,12 +1,12 @@
 # ImgSearch
-
+***
 基于 PicImageSearch 的搜图小程序，可以利用 SauceNAO 搜出图片的来源（pixiv、twitter等都可以）。还可以把要搜的图放在一个文件夹里，自动下载图片的原图（如果能搜到并且原图来自pixiv的话）
 
-![avatar](https://files.catbox.moe/8fyh5b.png)
-![avatar](https://files.catbox.moe/1gdqbo.png)
+![avatar](https://files.catbox.moe/y0th5c.png)
+![avatar](https://files.catbox.moe/zfs9ek.png)
 
 ## 如何使用
-
+***
 首先去 SauceNAO 获得 api key，具体方法如下：
 
 1.打开 SauceNAO，点击右下角的 Account
@@ -28,12 +28,16 @@
 
 ![avatar](https://files.catbox.moe/h1qhw4.png)
 
-利用本程序的“自动搜图并下载”功能后，得到的结果如下图（如果原图不来自pixiv或者出现了网络问题，那么就会跳过这张图去下载下一个）
+选择图片的命名方式为”原文件名“，点击“自动搜图并下载”按钮后，得到的结果如下图（如果原图不来自pixiv或者出现了网络问题，那么就会跳过这张图去下载下一个）
 
 ![avatar](https://files.catbox.moe/mpfj79.png)
 
 因为图片的名字是相同的，所以排序方式也是相同的，这样就方便找出哪些图没有下载
 
-## 注意
+如果你选择图片的命名方式为”原Pixiv名“，那么下载后得到的结果如下图
 
+![avatar](https://files.catbox.moe/smxglu.png)
+
+## 注意
+***
 由于网络问题和我的代码问题，所以它运行的可能有些慢，并且有时候会无响应。搜图的话大概5秒就能看到结果，请耐心等待，不要频繁操作。如果是批量下载的话，那将会根据图片数量等待一段时间，建议点完“自动搜图并下载”之后就挂在后台不管，全部下载好之后就可以正常操作了
