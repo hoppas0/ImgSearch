@@ -234,7 +234,7 @@ async def run():
                         "每日访问额度用完了" if selectedLanguage == 'Chinese' else 'The daily access credit is running out')  # 之前是8层缩进,现在缩减到了5层
                     break
                 if "pixiv.net" not in resp.raw[0].url:
-                    break
+                    continue
                 if expectedName == 'fileName':
                     await getPixivImg(resp.raw[0].url, file)  # 异步调用GetPixivImg
                 else:

@@ -36,10 +36,12 @@ async def getPixivImg(url: str, name: str = ""):
     if not os.path.exists("PixivImage"):
         os.mkdir("PixivImage")
     if name == "":      # 当name为空时，使用Pixiv原名
-        name = url.split("/")[-1]
-    with open("./PixivImage/" + name, "wb") as f:
+        imageName = url.split("/")[-1]
+    else:
+        imageName = name
+    with open("./PixivImage/" + imageName, "wb") as f:
         f.write(response.content)  # 将图片二进制数据存入，图片也就得到了
-    print(name + "下载成功")
+    print(imageName + "下载成功")
     time.sleep(1)
     return 1
 
