@@ -1,0 +1,11 @@
+lxml~=4.9.2
+cssselect~=1.2.0
+pyquery~=1.4.3
+aiohttp~=3.8.3
+multidict~=6.0.4
+PySimpleGUI~=4.60.4
+pyperclip~=1.8.2
+Pillow~=9.3.0
+loguru~=0.6.0
+picimagesearch~=3.7.4
+requests~=2.28.1
