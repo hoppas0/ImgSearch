@@ -7,9 +7,9 @@
 
 ## 如何使用
 
-首先去 SauceNAO 获得 api key，具体方法如下：
+首先去 [SauceNAO](https://saucenao.com/) 获得 api key，具体方法如下：
 
-1.打开 SauceNAO，点击右下角的 Account
+1.打开 [SauceNAO](https://saucenao.com/)，点击右下角的 Account
 
 2.在 Register 中注册你的账号
 
