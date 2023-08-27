@@ -33,13 +33,13 @@ async def getPixivImg(url: str, name: str = ""):
     }
     response = requests.get(url=img_url, headers=headers_download)
     # name = url.split("/")[-1]
-    if not os.path.exists("PixivImage"):
-        os.mkdir("PixivImage")
+    if not os.path.exists("PixivImages"):
+        os.mkdir("PixivImages")
     if name == "":      # 当name为空时，使用Pixiv原名
         imageName = url.split("/")[-1]
     else:
         imageName = name
-    with open("./PixivImage/" + imageName, "wb") as f:
+    with open("./PixivImages/" + imageName, "wb") as f:
         f.write(response.content)  # 将图片二进制数据存入，图片也就得到了
     print(imageName + "下载成功")
     time.sleep(1)
@@ -52,4 +52,4 @@ if __name__ == "__main__":
     url = "https://www.pixiv.net/artworks/74718584"
     getPixivImg(name, url)
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(getPixivImg(url,'123.jpg'))
+    loop.run_until_complete(getPixivImg(url, name))
