@@ -218,6 +218,7 @@ async def run():
                 window["-remaining-"].update("出错了" if selectedLanguage == 'Chinese' else 'Something went wrong')
 
         if event == "-download-":  # 下载时不显示正在下载的图片
+            apikey = values["-apikey-"]
             # 打开文件夹
             path = values["-FOLDER-"]
             dirs = os.listdir(path)
@@ -227,25 +228,25 @@ async def run():
                 if file[-3:] not in ["jpg", "png"]:
                     continue
                 filename = path + '/' + file
-                resp2 = await ImgSearch(filename, apikey)           # 这里命名为resp2是为了和上面的resp做区分
-                if resp2 is None:
+                resp = await ImgSearch(filename, apikey)
+                if resp.raw == []:
                     window["-remaining-"].update("网络错误" if selectedLanguage == 'Chinese' else 'Network error')
                     continue
-                if resp2.short_remaining == 0:
+                if resp.short_remaining == 0:
                     time.sleep(30)
-                if resp2.long_remaining == 0:
+                if resp.long_remaining == 0:
                     window["-remaining-"].update(
                         "每日访问额度用完了" if selectedLanguage == 'Chinese' else 'The daily access credit is running out')
                     break
-                if "pixiv.net" not in resp2.raw[0].url:
+                if "pixiv.net" not in resp.raw[0].url:
                     if not os.path.exists("FailedImages"):
                         os.mkdir("FailedImages")
                     shutil.copy(filename, f"./FailedImages/{file}")
                     continue
                 if expectedName == 'fileName':
-                    await getPixivImg(resp2.raw[0].url, file)  # 异步调用GetPixivImg
+                    await getPixivImg(resp.raw[0].url, file)  # 异步调用GetPixivImg
                 else:
-                    await getPixivImg(resp2.raw[0].url)          # 图片命名为原Pixiv名
+                    await getPixivImg(resp.raw[0].url)          # 图片命名为原Pixiv名
             else:  # for循环正常结束
                 window["-remaining-"].update("下载结束" if selectedLanguage == 'Chinese' else 'The download ends')
 
