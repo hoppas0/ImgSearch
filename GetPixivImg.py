@@ -2,7 +2,6 @@ import os
 import time
 import requests
 import asyncio
-import aiohttp
 
 
 async def getPixivImg(url: str, name: str = ""):

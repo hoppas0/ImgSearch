@@ -7,14 +7,13 @@ from PicImageSearch.model import SauceNAOResponse
 # proxies = "http://127.0.0.1:1081"
 proxies = None
 url = "https://raw.githubusercontent.com/kitUIN/PicImageSearch/main/demo/images/test01.jpg"
-filename = "E:/my/tu/robot/20.png"
-api_key = "f53999896aafed5928d4ae136c5d0d600039b467"
-bypass = True  # 是否绕过DNS污染
+filename = "D:/my/tu/tset/149d002144a24064.jpg"
+api_key = "e7c24ac9c353e96cb03805df58b53d04a6d9fa64"
 
 
 @logger.catch()
 async def ImgSearch(filename:str, api_key:str) -> SauceNAOResponse:
-    async with Network(proxies=proxies, bypass=bypass) as client:
+    async with Network(proxies=proxies) as client:
         saucenao = SauceNAO(client=client, api_key=api_key, hide=3)
         # resp = await saucenao.search(url=url)
         resp = await saucenao.search(file=filename)

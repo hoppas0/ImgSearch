@@ -1,16 +1,19 @@
-import base64
 import asyncio
 import time
+import base64
+import os.path
+import shutil
+import threading
+from io import BytesIO
+from queue import Queue
 
 from PIL import Image
 import PySimpleGUI as sg
-import os.path
-from io import BytesIO
 from ImgSearch import ImgSearch
+import pyperclip
+
 from UrlToBase64 import urltobase64
 from GetPixivImg import getPixivImg
-import pyperclip
-import shutil
 
 apikey = ''
 selectedLanguage = "Chinese"
@@ -53,10 +56,41 @@ languages = {
         'pixivname': 'Original Pixiv name'
     }
 }
+queue_resp = Queue()
+
+
+async def _get_resp(filename:str, apikey:str):
+    global queue_resp
+    resp = await ImgSearch(filename, apikey)
+    url = resp.raw[0].thumbnail  # 缩略图地址
+    remaining = [resp.short_remaining, resp.long_remaining]
+    rb64 = urltobase64(url)
+    rb = base64.b64decode(rb64)
+    rimg_data = BytesIO(rb)
+    rimg = Image.open(rimg_data)
+    if rb64[:3] == b'/9j':
+        rimg.convert("RGBA")
+    rimg_buffer = BytesIO()
+    rimg.save(rimg_buffer, format='PNG')
+    rbyte_data = rimg_buffer.getvalue()
+    rb64f = base64.b64encode(rbyte_data)
+    dic_temp = {'resp':resp, 'rb64f':rb64f}
+    queue_resp.put(dic_temp)
+
+async def get_resp(filename:str, apikey:str):
+    new_loop = asyncio.new_event_loop()
+    t1 = threading.Thread(target=start_event_loop, args=(new_loop,))
+    t1.start()
+    asyncio.run_coroutine_threadsafe(_get_resp(filename, apikey), new_loop)
+
+def start_event_loop(loop):
+    # 设置事件循环为当前线程的事件循环
+    asyncio.set_event_loop(loop)
+    loop.run_forever()
 
 
 async def run():
-    global apikey, languages, selectedLanguage, expectedName
+    global apikey, languages, selectedLanguage, expectedName, queue_resp
     file_list_column = [
         [sg.Text("选择语言", size=(20, 1), key='-SELECTLANGUAGE-'),
          sg.Combo(["Chinese", "English"], size=(10, 1), default_value="Chinese", enable_events=True, key='-LANGUAGE-')],
@@ -107,17 +141,34 @@ async def run():
     window = sg.Window("ImgSearch", layout)
 
     while True:
-        event, values = window.read()
-        try:
-            with open('apikey.txt', 'r', encoding='utf-8') as f:
-                apikey = f.readline()
-                window["-apikey-"].update(apikey)
-        except:
-            window["-remaining-"].update(
-                "apikey.txt出错了" if selectedLanguage == 'Chinese' else "APIkey .txt Something went wrong")
+        event, values = window.read(timeout=1000,timeout_key='refresh')
+        print(f'event:{event}, values:{values}')
+
+        if window["-apikey-"].get() == '':
+            try:
+                with open('apikey.txt', 'r', encoding='utf-8') as f:
+                    apikey = f.readline()
+                    window["-apikey-"].update(apikey)
+            except:
+                window["-remaining-"].update(
+                    "apikey.txt出错了" if selectedLanguage == 'Chinese' else "apikey.txt Something went wrong")
 
         if event == "Exit" or event == sg.WIN_CLOSED:
             break
+
+        if event == 'refresh':
+            while not queue_resp.empty():
+                dic:dict = queue_resp.get()
+                resp, rb64f = dic.values()
+                similarity_message = f"相似度:{resp.raw[0].similarity}%" if selectedLanguage == 'Chinese' else f"Similarity:{resp.raw[0].similarity}%"
+                window["-similarity-"].update(similarity_message)
+                author_message = f"作者:{resp.raw[0].author}" if selectedLanguage == 'Chinese' else f"Author:{resp.raw[0].author}"
+                window["-author-"].update(author_message)
+                remaining = [resp.short_remaining, resp.long_remaining]
+                remaining_message = f"剩余访问额度: 每天:{remaining[1]}  每30秒:{remaining[0]}" if selectedLanguage == 'Chinese' else f"Remaining access credit: One day:{remaining[1]}  30s:{remaining[0]}"
+                window["-remaining-"].update(remaining_message)
+                window["-URL-"].update(resp.raw[0].url)
+                window["-IMAGE2-"].update(data=rb64f)
 
         if event == "-LANGUAGE-":
             selectedLanguage = values['-LANGUAGE-']
@@ -180,7 +231,7 @@ async def run():
                 max_size = max(w, h)
                 if max_size > 512:
                     image = image.resize((int(512.0 * w / max_size),
-                                          int(512.0 * h / max_size)), Image.ANTIALIAS)
+                                          int(512.0 * h / max_size)))
                 if filename[-3:] == 'jpg':  # 如果是jpg文件，则用PIL转成PNG的四个通道
                     image.convert("RGBA")
                 img_buffer = BytesIO()
@@ -191,27 +242,28 @@ async def run():
                 window["-IMAGE-"].update(data=base64_data)
 
                 # 搜图并显示结果
-                resp = await ImgSearch(filename, apikey)
-                url = resp.raw[0].thumbnail  # 缩略图地址
-                remaining = [resp.short_remaining, resp.long_remaining]
-                rb64 = urltobase64(url)
-                rb = base64.b64decode(rb64)
-                rimg_data = BytesIO(rb)
-                rimg = Image.open(rimg_data)
-                if rb64[:3] == b'/9j':
-                    rimg.convert("RGBA")
-                rimg_buffer = BytesIO()
-                rimg.save(rimg_buffer, format='PNG')
-                rbyte_data = rimg_buffer.getvalue()
-                rb64f = base64.b64encode(rbyte_data)
-                similarity_message = f"相似度:{resp.raw[0].similarity}%" if selectedLanguage == 'Chinese' else f"Similarity:{resp.raw[0].similarity}%"
-                window["-similarity-"].update(similarity_message)
-                author_message = f"作者:{resp.raw[0].author}" if selectedLanguage == 'Chinese' else f"Author:{resp.raw[0].author}"
-                window["-author-"].update(author_message)
-                remaining_message = f"剩余访问额度: 每天:{remaining[1]}  每30秒:{remaining[0]}" if selectedLanguage == 'Chinese' else f"Remaining access credit: One day:{remaining[1]}  30s:{remaining[0]}"
-                window["-remaining-"].update(remaining_message)
-                window["-URL-"].update(resp.raw[0].url)
-                window["-IMAGE2-"].update(data=rb64f)
+                # resp = await ImgSearch(filename, apikey)
+                # url = resp.raw[0].thumbnail  # 缩略图地址
+                # rb64 = urltobase64(url)
+                # rb = base64.b64decode(rb64)
+                # rimg_data = BytesIO(rb)
+                # rimg = Image.open(rimg_data)
+                # if rb64[:3] == b'/9j':
+                #     rimg.convert("RGBA")
+                # rimg_buffer = BytesIO()
+                # rimg.save(rimg_buffer, format='PNG')
+                # rbyte_data = rimg_buffer.getvalue()
+                # rb64f = base64.b64encode(rbyte_data)
+                await get_resp(filename, apikey)
+                # similarity_message = f"相似度:{resp.raw[0].similarity}%" if selectedLanguage == 'Chinese' else f"Similarity:{resp.raw[0].similarity}%"
+                # window["-similarity-"].update(similarity_message)
+                # author_message = f"作者:{resp.raw[0].author}" if selectedLanguage == 'Chinese' else f"Author:{resp.raw[0].author}"
+                # window["-author-"].update(author_message)
+                # remaining = [resp.short_remaining, resp.long_remaining]
+                # remaining_message = f"剩余访问额度: 每天:{remaining[1]}  每30秒:{remaining[0]}" if selectedLanguage == 'Chinese' else f"Remaining access credit: One day:{remaining[1]}  30s:{remaining[0]}"
+                # window["-remaining-"].update(remaining_message)
+                # window["-URL-"].update(resp.raw[0].url)
+                # window["-IMAGE2-"].update(data=rb64f)
             except BaseException as e:
                 print("出错了")
                 print(e.args)
